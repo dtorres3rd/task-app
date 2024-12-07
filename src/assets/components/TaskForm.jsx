@@ -4,17 +4,40 @@ import React, { useState } from 'react';
 import './TaskForm.css';
 import Tag from './Tag';
 
-const TaskForm = () => {
-  const [taskData, settaskData] = useState({
+const TaskForm = ({ setTasks }) => {
+  const [taskData, setTaskData] = useState({
     task: '',
     status: 'todo',
+    tags: [],
   });
+
+  const checkTag = (tag) => {
+    return taskData.tags.some((item) => {
+      return item === tag;
+    });
+  };
+
+  const selectTag = (tag) => {
+    if (taskData.tags.some((item) => item === tag)) {
+      const filterTags = taskData.tags.filter((item) => {
+        return item !== tag;
+      });
+
+      setTaskData((prevValue) => {
+        return { ...prevValue, tags: filterTags };
+      });
+    } else {
+      setTaskData((prevValue) => {
+        return { ...prevValue, tags: [...prevValue.tags, tag] };
+      });
+    }
+  };
 
   const handleChange = (e) => {
     /* an input form must have 'name' property for this to work, see textbox (input) and dropdown (select) for identification purposes */
     const { name, value } = e.target;
 
-    settaskData((prevValue) => {
+    setTaskData((prevValue) => {
       /* [name] might be key name 'task' or 'status' from an input form then update the value */
       return { ...prevValue, [name]: value };
     });
@@ -22,7 +45,17 @@ const TaskForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault(); // this will prevent default forms behavior - refresh the whole page. This is what we want for a SPA
-    console.log(taskData);
+    // console.log(taskData);
+    setTasks((prevValue) => {
+      return [...prevValue, taskData];
+    });
+
+    // reset form fields
+    setTaskData({
+      task: '',
+      status: 'todo',
+      tags: [],
+    });
   };
 
   return (
@@ -31,6 +64,7 @@ const TaskForm = () => {
         <input
           type='text'
           name='task'
+          value={taskData.task}
           className='task_input'
           placeholder='Enter your task'
           onChange={handleChange}
@@ -38,16 +72,38 @@ const TaskForm = () => {
 
         <div className='task_form_botton_line'>
           <div>
-            <Tag tagName='HTML' />
-            <Tag tagName='CSS' />
-            <Tag tagName='Javascript' />
-            <Tag tagName='React' />
-            <Tag tagName='Node' />
+            {/* passing 'selectTag' function in prop name selectTag */}
+            <Tag
+              tagName='HTML'
+              selectTag={selectTag}
+              selected={checkTag('HTML')}
+            />
+            <Tag
+              tagName='CSS'
+              selectTag={selectTag}
+              selected={checkTag('CSS')}
+            />
+            <Tag
+              tagName='Javascript'
+              selectTag={selectTag}
+              selected={checkTag('Javascript')}
+            />
+            <Tag
+              tagName='React'
+              selectTag={selectTag}
+              selected={checkTag('React')}
+            />
+            <Tag
+              tagName='Node'
+              selectTag={selectTag}
+              selected={checkTag('Node')}
+            />
           </div>
 
           <div>
             <select
               name='status'
+              value={taskData.status}
               className='task_status'
               onChange={handleChange}
             >
